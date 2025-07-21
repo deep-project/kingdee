@@ -97,6 +97,11 @@ cli.SendMsg(data any)
 
 ```
 
+#### 直接根据服务名称调用
+```
+c.Handler.Call("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.CancelAllocate.common.kdsvc" , map[string]any{"data": data})
+```
+
 ### 支持三种登录方式
 
 ```
