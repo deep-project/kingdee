@@ -21,7 +21,7 @@ type LoginBySign struct {
 	LanguageID string // 语言ID
 }
 
-func (login *LoginBySign) KDSVCSessionId(api *client.API) (string, error) {
+func (login *LoginBySign) KDSVCSessionId(f *client.Fetcher) (string, error) {
 	timestamp := fmt.Sprintf("%d", time.Now().Unix())
 	params := map[string]any{
 		"parameters": []string{
@@ -33,7 +33,7 @@ func (login *LoginBySign) KDSVCSessionId(api *client.API) (string, error) {
 			login.LanguageID,
 		},
 	}
-	respBody, err := api.Request(consts.LoginBySign_API, params)
+	respBody, err := f.Request(consts.LoginBySign_API, params)
 	if err != nil {
 		return "", err
 	}

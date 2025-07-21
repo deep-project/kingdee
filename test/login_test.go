@@ -55,10 +55,10 @@ func getLoginByValidateUserAdapter() *adapters.LoginByValidateUser {
 	}
 }
 
-func logKDSVCSessionId(t *testing.T, login client.Login) {
-	cli, err := kingdee.New(client.NewAPI(os.Getenv("BASE_URL")), login, &client.Options{})
+func logKDSVCSessionId(t *testing.T, login client.LoginInterface) {
+	cli, err := kingdee.New(client.NewOptions(os.Getenv("BASE_URL"), login))
 	if err != nil {
 		t.Error(err)
 	}
-	t.Log(cli.Handler.API.KDSVCSessionId)
+	t.Log(cli.Handler.GetKDSVCSessionId())
 }

@@ -15,7 +15,7 @@ type LoginByValidateUser struct {
 	LanguageID string // 语言ID
 }
 
-func (login *LoginByValidateUser) KDSVCSessionId(api *client.API) (string, error) {
+func (login *LoginByValidateUser) KDSVCSessionId(f *client.Fetcher) (string, error) {
 	params := map[string]any{
 		"parameters": []string{
 			login.AccountID,
@@ -24,7 +24,7 @@ func (login *LoginByValidateUser) KDSVCSessionId(api *client.API) (string, error
 			login.LanguageID,
 		},
 	}
-	respBody, err := api.Request(consts.LoginByValidateUser_API, params)
+	respBody, err := f.Request(consts.LoginByValidateUser_API, params)
 	if err != nil {
 		return "", err
 	}

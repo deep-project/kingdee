@@ -3,55 +3,101 @@ package client
 import (
 	"errors"
 	"time"
+
+	"github.com/deep-project/kingdee/utils"
 )
 
-type Options struct {
-	// 定时刷新sessionID的时间间隔
-	RefreshAPISessionIdInterval time.Duration
-}
-
 type Handler struct {
-	API     *API
-	Login   Login
-	Options *Options
-
+	options *Options
+	fetcher *Fetcher
 	// 定时刷新sessionid的定时器
-	refreshAPISessionIdTicker *time.Ticker
+	refreshSessionIdTicker *time.Ticker
 }
 
-func (c *Handler) RefreshAPISessionID() (err error) {
-	sid, err := c.Login.KDSVCSessionId(c.API)
+func NewHandler(options *Options) (_ *Handler, err error) {
+	fetcher, err := NewFetcher(options.BaseURL, options.UserAgent)
 	if err != nil {
 		return
 	}
-	c.API.SetKDSVCSessionId(sid)
-	return nil
+	h := &Handler{options: options, fetcher: fetcher}
+	h.RefreshSessionID()
+	h.RunRefreshSessionIdJob()
+	return h, nil
 }
 
-// 定时刷新api session ID任务
+// 设置登录接口
+func (h *Handler) SetLogin(login LoginInterface) {
+	h.options.Login = login
+}
+
+// 设置登录接口并刷新sessionid
+func (h *Handler) SetLoginAndRefreshSessionID(login LoginInterface) error {
+	h.SetLogin(login)
+	return h.RefreshSessionID()
+}
+
+// 获取sessionid
+func (h *Handler) GetKDSVCSessionId() string {
+	if h.fetcher == nil {
+		return ""
+	}
+	return h.fetcher.KDSVCSessionId
+}
+
+// 刷新sessionid
+func (h *Handler) RefreshSessionID() (err error) {
+	if h.options.Login == nil {
+		return errors.New("Login undefined")
+	}
+	sid, err := h.options.Login.KDSVCSessionId(h.fetcher)
+	if err != nil {
+		return
+	}
+	h.fetcher.SetKDSVCSessionId(sid)
+	return
+}
+
+// 定时刷新session ID任务
 // 如果存在旧的定时器，会先停止旧的定时器并覆盖
-func (c *Handler) RunRefreshAPISessionIdJob() {
+func (h *Handler) RunRefreshSessionIdJob() {
 	go func() {
-		if c.Options.RefreshAPISessionIdInterval <= 0 {
+		if h.options.RefreshSessionIdInterval <= 0 {
 			return
 		}
-		if c.refreshAPISessionIdTicker != nil {
-			c.refreshAPISessionIdTicker.Stop() // 先停止旧的
+		if h.refreshSessionIdTicker != nil {
+			h.refreshSessionIdTicker.Stop() // 先停止旧的
 		}
-		c.refreshAPISessionIdTicker = time.NewTicker(c.Options.RefreshAPISessionIdInterval)
-		defer c.refreshAPISessionIdTicker.Stop()
-		for range c.refreshAPISessionIdTicker.C {
-			c.RefreshAPISessionID()
+		h.refreshSessionIdTicker = time.NewTicker(h.options.RefreshSessionIdInterval)
+		defer h.refreshSessionIdTicker.Stop()
+		for range h.refreshSessionIdTicker.C {
+			h.RefreshSessionID()
 		}
 	}()
 }
 
-func (c *Handler) Call(serviceName string, params map[string]any) ([]byte, error) {
-	if c.API == nil {
+func (h *Handler) Call(serviceName string, params map[string]any) ([]byte, error) {
+	return h.call(serviceName, params, 0)
+}
+
+func (h *Handler) call(serviceName string, params map[string]any, count int) (res []byte, err error) {
+	if h.fetcher == nil {
 		return nil, errors.New("API undefined")
 	}
-	if c.API.KDSVCSessionId == "" {
-		return nil, errors.New("KDSVCSessionId undefined")
+	res, err = h.fetcher.Request(serviceName, params)
+	if err != nil {
+		return
 	}
-	return c.API.Request(serviceName, params)
+	// 如果sessionid过期，则刷新sessionid后再次请求
+	if h.options.SessionExpiredRetryCount > 0 {
+		if count >= h.options.SessionExpiredRetryCount {
+			return
+		}
+		if utils.IsSessionExpired(res) {
+			if err = h.RefreshSessionID(); err != nil {
+				return
+			}
+			return h.call(serviceName, params, count+1)
+		}
+	}
+	return
 }
