@@ -4,7 +4,7 @@ kingdee sdk / 金蝶云星空SDK
 
 ## 使用 / Usage
 
-```
+```go
 
 import (
 	"fmt"
@@ -35,7 +35,7 @@ func main() {
 ```
 
 ### 内置方法
-```
+```go
 
 // 获取账套列表(获取数据中心列表)
 cli.GetDataCenterList() 
@@ -94,17 +94,16 @@ cli.GroupDelete(formid string, data any)
 cli.GetSysReportData(formid string, data any)
 // 发送消息
 cli.SendMsg(data any)
-
 ```
 
 #### 直接根据服务名称调用
-```
-c.Handler.Call("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.CancelAllocate.common.kdsvc" , map[string]any{"data": data})
+```go
+cli.Handler.Call("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.CancelAllocate.common.kdsvc" , map[string]any{"data": data})
 ```
 
 ### 支持三种登录方式
 
-```
+```go
 // 通过sign登录
 &adapters.LoginBySign{
   AccountID:  "ACCOUNT_ID",
@@ -131,6 +130,11 @@ c.Handler.Call("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.CancelAllocat
   LanguageID: "LANGUAGE_ID",
 }
 ```
+### 支持定时刷新sessionid
+可设置每隔多久刷新一次sessionid，防止过期
+
+### 支持被动刷新sessionid
+如果访问接口发现已经过期，则刷新sessionid再次请求
 
 ## 依赖 / Dependencies
 [tidwall/gjson](https://github.com/tidwall/gjson)
