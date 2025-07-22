@@ -131,10 +131,23 @@ cli.Handler.Call("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.CancelAlloc
 }
 ```
 ### 支持定时刷新sessionid
-可设置每隔多久刷新一次sessionid，防止过期
+可设置每隔多久刷新一次sessionid，防止过期。默认5分钟，可以在配置设置。
+```go
+options := kingdee.NewOptions("http://127.0.0.1:9010/K3Cloud/", &adapters.LoginBySign{....})
+options.SetRefreshSessionIdInterval(30 * time.Minute)
+cli, err := kingdee.New(options)
+
+```
+
 
 ### 支持被动刷新sessionid
-如果访问接口发现已经过期，则刷新sessionid再次请求
+如果访问接口发现已经过期，则刷新sessionid再次请求。默认重试1次，可以在配置设置。
+```go
+options := kingdee.NewOptions("http://127.0.0.1:9010/K3Cloud/", &adapters.LoginBySign{....})
+options.SessionExpiredRetryCount(3)
+cli, err := kingdee.New(options)
+
+```
 
 ### 可后置登录接口
 如果初始需要通过免登录的GetDataCenterList()接口获取账套列表，可以先不设置登录接口，拿到账套信息后再设置

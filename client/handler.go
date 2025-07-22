@@ -27,7 +27,7 @@ func NewHandler(options *Options) (_ *Handler, err error) {
 
 // 设置登录接口
 func (h *Handler) SetLogin(login LoginInterface) {
-	h.options.Login = login
+	h.options.SetLogin(login)
 }
 
 // 设置登录接口并刷新sessionid
