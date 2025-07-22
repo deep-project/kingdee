@@ -11,37 +11,41 @@ import (
 )
 
 type Fetcher struct {
-	BaseURL        string
-	UserAgent      string
-	KDSVCSessionId string
-	Header         map[string]string
+	options        *Options
+	kdsvcSessionId string
 }
 
-func NewFetcher(baseURL string) (*Fetcher, error) {
-	if baseURL == "" {
+func NewFetcher(opt *Options) (*Fetcher, error) {
+	if opt == nil {
+		return nil, errors.New("options undefined")
+	}
+	if opt.BaseURL == "" {
 		return nil, errors.New("BaseURL undefined")
 	}
-	if !strings.HasSuffix(baseURL, "/") {
-		baseURL = baseURL + "/"
+	if !strings.HasSuffix(opt.BaseURL, "/") {
+		opt.BaseURL = opt.BaseURL + "/"
 	}
-	return &Fetcher{BaseURL: baseURL}, nil
+	return &Fetcher{options: opt}, nil
 }
 
 func (f *Fetcher) SetKDSVCSessionId(kdsvcSessionId string) {
-	f.KDSVCSessionId = kdsvcSessionId
+	f.kdsvcSessionId = kdsvcSessionId
 }
-
+func (f *Fetcher) GetKDSVCSessionId() string {
+	return f.kdsvcSessionId
+}
 func (f *Fetcher) GetRequestURL(serviceName string) string {
-	return f.BaseURL + serviceName
+	return f.options.BaseURL + serviceName
 }
 
 func (f *Fetcher) RequestHeader(more map[string]string) map[string]string {
 	res := map[string]string{
 		"Content-Type":        "application/json",
-		"User-Agent":          f.UserAgent,
-		"kdservice-sessionid": f.KDSVCSessionId,
+		"User-Agent":          f.options.UserAgent,
+		"kdservice-sessionid": f.kdsvcSessionId,
+		"api-client-identity": f.options.APIClientIdentity,
 	}
-	maps.Copy(res, f.Header)
+	maps.Copy(res, f.options.RequestHeader)
 	maps.Copy(res, more)
 	return res
 }
@@ -60,7 +64,9 @@ func (f *Fetcher) BaseRequest(serviceName string, header map[string]string, para
 		return
 	}
 	for k, v := range header {
-		req.Header.Set(k, v)
+		if v == "" {
+			req.Header.Set(k, v)
+		}
 	}
 	client := &http.Client{}
 	resp, err := client.Do(req)

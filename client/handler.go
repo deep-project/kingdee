@@ -15,12 +15,10 @@ type Handler struct {
 }
 
 func NewHandler(options *Options) (_ *Handler, err error) {
-	fetcher, err := NewFetcher(options.BaseURL)
+	fetcher, err := NewFetcher(options)
 	if err != nil {
 		return
 	}
-	fetcher.UserAgent = options.UserAgent
-	fetcher.Header = options.RequestHeader
 	h := &Handler{options: options, fetcher: fetcher}
 	h.RefreshSessionID()
 	h.RunRefreshSessionIdJob()
@@ -43,7 +41,7 @@ func (h *Handler) GetKDSVCSessionId() string {
 	if h.fetcher == nil {
 		return ""
 	}
-	return h.fetcher.KDSVCSessionId
+	return h.fetcher.GetKDSVCSessionId()
 }
 
 // 刷新sessionid
