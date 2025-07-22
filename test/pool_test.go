@@ -32,7 +32,7 @@ func TestPool(t *testing.T) {
 			client := p.Get()
 			defer p.Put(client)
 			time.Sleep(2 * time.Second) // 延迟两秒，查看效果
-			t.Log("KDSVCSessionId", client.Handler.GetKDSVCSessionId())
+			t.Log("KDSVCSessionId: ", client.Handler.GetKDSVCSessionId())
 		}()
 	}
 	wg.Wait()

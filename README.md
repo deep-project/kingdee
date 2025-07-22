@@ -132,10 +132,10 @@ cli.Handler.Call("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.CancelAlloc
 }
 ```
 ### 支持定时刷新sessionid
->可设置每隔多久刷新一次sessionid，防止过期。默认15分钟（因为金蝶服务端默认20分钟过期），可以在配置设置。
+>可设置每隔多久刷新一次sessionid，防止过期。默认15分钟（因为金蝶服务端默认20分钟过期），可以在配置设置。根据金蝶内部规则，如果20分钟内请求不闲置的话，session是会自动续期的。但以防万一，启用定时刷新更保险一些。
 ```go
 options := kingdee.NewOptions("http://127.0.0.1:9010/K3Cloud/", &adapters.LoginBySign{....})
-options.SetRefreshSessionIdInterval(30 * time.Minute)
+options.SetRefreshSessionIdInterval(30 * time.Minute) // 每30分钟刷新一次sessionid
 cli, err := kingdee.New(options)
 
 ```
@@ -145,7 +145,7 @@ cli, err := kingdee.New(options)
 >如果访问接口发现已经过期，则刷新sessionid再次请求。默认重试1次，可以在配置设置。
 ```go
 options := kingdee.NewOptions("http://127.0.0.1:9010/K3Cloud/", &adapters.LoginBySign{....})
-options.SessionExpiredRetryCount(3)
+options.SessionExpiredRetryCount(3) // 过期时重试3次
 cli, err := kingdee.New(options)
 
 ```
@@ -191,6 +191,9 @@ import (
 )
 
 func main() {
+
+	// 创建5个客户端
+	// 金蝶建议的并发是3-5个
 	client_1, _ := kingdee.New(...)
 	client_2, _ := kingdee.New(...)
 	client_3, _ := kingdee.New(...)
