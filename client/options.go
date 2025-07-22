@@ -21,7 +21,7 @@ func NewOptions(baseURL string, login LoginInterface) Options {
 		BaseURL:                  baseURL,
 		UserAgent:                "Kingdee/Golang WebApi SDK (author: https://github.com/deep-project/kingdee)",
 		Login:                    login,
-		RefreshSessionIdInterval: 5 * time.Minute,
+		RefreshSessionIdInterval: 15 * time.Minute,
 		SessionExpiredRetryCount: 1,
 	}
 }

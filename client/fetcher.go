@@ -64,7 +64,7 @@ func (f *Fetcher) BaseRequest(serviceName string, header map[string]string, para
 		return
 	}
 	for k, v := range header {
-		if v == "" {
+		if v != "" {
 			req.Header.Set(k, v)
 		}
 	}

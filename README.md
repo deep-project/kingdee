@@ -1,5 +1,5 @@
-# kingdee
-kingdee sdk / 金蝶云星空SDK
+# kingdee webapi sdk
+金蝶云星空 webapi SDK,在金蝶云星空8.x版本测试通过
 
 
 ## 使用 / Usage
@@ -131,7 +131,7 @@ cli.Handler.Call("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.CancelAlloc
 }
 ```
 ### 支持定时刷新sessionid
-可设置每隔多久刷新一次sessionid，防止过期。默认5分钟，可以在配置设置。
+可设置每隔多久刷新一次sessionid，防止过期。默认15分钟（因为金蝶服务端默认20分钟过期），可以在配置设置。
 ```go
 options := kingdee.NewOptions("http://127.0.0.1:9010/K3Cloud/", &adapters.LoginBySign{....})
 options.SetRefreshSessionIdInterval(30 * time.Minute)
@@ -148,6 +148,18 @@ options.SessionExpiredRetryCount(3)
 cli, err := kingdee.New(options)
 
 ```
+### 全部配置项
+```go
+type Options struct {
+	BaseURL                  string            // api请求基地址
+	UserAgent                string            // api请求的UserAgent
+	APIClientIdentity        string            // 客户端标识(如果系统设置了验证标识，则需要填写)
+	RequestHeader            map[string]string // 额外的api请求头
+	Login                    LoginInterface    // 登录接口
+	RefreshSessionIdInterval time.Duration     // 定时刷新sessionID的时间间隔
+	SessionExpiredRetryCount int               // session过期重试次数
+}
+```
 
 ### 可后置登录接口
 如果初始需要通过免登录的GetDataCenterList()接口获取账套列表，可以先不设置登录接口，拿到账套信息后再设置
@@ -162,9 +174,46 @@ cli.Handler.SetLogin(&adapters.LoginByValidateUser{
   Password:   "USER_PASSWORD",
   LanguageID: "LANGUAGE_ID",
 })
+```
 
+### 使用池并发执行
+> 因为金蝶云星空的请求默认是同步模式，也就是说，一个session多次访问时，是同步请求，所以要实现并发执行，就要创建多个client携带不同的sessionid去请求。
+```go
+import (
+	"fmt"
+	"os"
+	"sync"
+
+	"github.com/deep-project/kingdee"
+	"github.com/deep-project/kingdee/client"
+	"github.com/deep-project/kingdee/pool"
+)
+
+func main() {
+	client_1, _ := kingdee.New(...)
+	client_2, _ := kingdee.New(...)
+	client_3, _ := kingdee.New(...)
+	client_4, _ := kingdee.New(...)
+	client_5, _ := kingdee.New(...)
+
+	var p = pool.New([]*client.Client{client_1, client_2, client_3, client_4, client_5})
+	var wg sync.WaitGroup
+
+	for range 100 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			client := p.Get()
+			defer p.Put(client)
+			// 调用金蝶保存接口
+			client.Save(...)
+		}()
+	}
+	wg.Wait()
+}
 
 ```
+
 
 ## 依赖 / Dependencies
 [tidwall/gjson](https://github.com/tidwall/gjson)
