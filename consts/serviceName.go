@@ -1,5 +1,6 @@
 package consts
 
+// 以下是系统自带API
 const (
 	GetDataCenterList_API   = "Kingdee.BOS.ServiceFacade.ServicesStub.Account.AccountService.GetDataCenterList.common.kdsvc" // 获取账套列表(获取数据中心列表)
 	LoginByAppSecret_API    = "Kingdee.BOS.WebApi.ServicesStub.AuthService.LoginByAppSecret.common.kdsvc"                    // 通过appSecret登录
@@ -33,4 +34,9 @@ const (
 	GroupDelete_API         = "Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.GroupDelete.common.kdsvc"                  // 分组删除
 	GetSysReportData_API    = "Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.GetSysReportData.common.kdsvc"             // 查询报表数据
 	SendMsg_API             = "Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.SendMsg.common.kdsvc"                      // 发送消息
+)
+
+// 以下是官方人员自定义的API
+const (
+	GetInventoryData_API = "Kingdee.K3.SCM.WebApi.ServicesStub.InventoryQueryService.GetInventoryData.common.kdsvc"
 )
