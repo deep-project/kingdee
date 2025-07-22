@@ -185,7 +185,7 @@ func (c *Client) SendMsg(data any) (raw []byte, err error) {
 // 获取即时库存(官方自定义版本)
 // 支持版本： 补丁号：PT-146848 （即2020年8月13号之后的补丁）
 // 位置在API文档的 供应量->库存管理->自定义API->即时库存（https://openapi.open.kingdee.com/ApiDoc）
-// 此接口的说明地址 https://vip.kingdee.com/knowledge/specialDetail/650386937144032256?category=650391447480414720&id=86193103010176000
+// 此接口的说明地址 https://vip.kingdee.com/link/s/MU4cj
 func (c *Client) GetInventoryData(data any) (raw []byte, err error) {
 	return c.Handler.Call(consts.GetInventoryData_API, map[string]any{"data": data})
 }
