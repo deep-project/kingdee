@@ -1,5 +1,5 @@
 # kingdee webapi sdk
-金蝶云星空 webapi SDK,在金蝶云星空8.x版本测试通过
+金蝶云星空 webapi SDK,在金蝶云星空8.x版本测试通过，其他版本各位自测
 
 
 ## 使用 / Usage
@@ -35,8 +35,8 @@ func main() {
 ```
 
 ### 内置方法
+> 基本上内置了所有，如果有缺失，可以报告给我加上
 ```go
-
 // 获取账套列表(获取数据中心列表)
 cli.GetDataCenterList() 
 // 查看
@@ -97,12 +97,13 @@ cli.SendMsg(data any)
 ```
 
 #### 直接根据服务名称调用
+>如果内置方法无法满足需求，亦可以直接通过服务名请求结果。
 ```go
 cli.Handler.Call("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.CancelAllocate.common.kdsvc" , map[string]any{"data": data})
 ```
 
 ### 支持三种登录方式
-
+>官方推荐的是sign登录方式，更安全。
 ```go
 // 通过sign登录
 &adapters.LoginBySign{
@@ -131,7 +132,7 @@ cli.Handler.Call("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.CancelAlloc
 }
 ```
 ### 支持定时刷新sessionid
-可设置每隔多久刷新一次sessionid，防止过期。默认15分钟（因为金蝶服务端默认20分钟过期），可以在配置设置。
+>可设置每隔多久刷新一次sessionid，防止过期。默认15分钟（因为金蝶服务端默认20分钟过期），可以在配置设置。
 ```go
 options := kingdee.NewOptions("http://127.0.0.1:9010/K3Cloud/", &adapters.LoginBySign{....})
 options.SetRefreshSessionIdInterval(30 * time.Minute)
@@ -141,7 +142,7 @@ cli, err := kingdee.New(options)
 
 
 ### 支持被动刷新sessionid
-如果访问接口发现已经过期，则刷新sessionid再次请求。默认重试1次，可以在配置设置。
+>如果访问接口发现已经过期，则刷新sessionid再次请求。默认重试1次，可以在配置设置。
 ```go
 options := kingdee.NewOptions("http://127.0.0.1:9010/K3Cloud/", &adapters.LoginBySign{....})
 options.SessionExpiredRetryCount(3)
@@ -162,7 +163,7 @@ type Options struct {
 ```
 
 ### 可后置登录接口
-如果初始需要通过免登录的GetDataCenterList()接口获取账套列表，可以先不设置登录接口，拿到账套信息后再设置
+>如果初始需要通过免登录的GetDataCenterList()接口获取账套列表，可以先不设置登录接口，拿到账套信息后再设置
 ```go
 cli, err := kingdee.New(kingdee.NewOptions("http://127.0.0.1:9010/K3Cloud/", nil))
 
