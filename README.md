@@ -136,5 +136,22 @@ cli.Handler.Call("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.CancelAlloc
 ### 支持被动刷新sessionid
 如果访问接口发现已经过期，则刷新sessionid再次请求
 
+### 可后置登录接口
+如果初始需要通过免登录的GetDataCenterList()接口获取账套列表，可以先不设置登录接口，拿到账套信息后再设置
+```go
+cli, err := kingdee.New(kingdee.NewOptions("http://127.0.0.1:9010/K3Cloud/", nil))
+
+AccountInfo,err :=cli.GetDataCenterList()
+
+cli.Handler.SetLogin(&adapters.LoginByValidateUser{
+  AccountID:  "ACCOUNT_ID",
+  Username:   "USER_NAME",
+  Password:   "USER_PASSWORD",
+  LanguageID: "LANGUAGE_ID",
+})
+
+
+```
+
 ## 依赖 / Dependencies
 [tidwall/gjson](https://github.com/tidwall/gjson)

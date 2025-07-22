@@ -15,10 +15,12 @@ type Handler struct {
 }
 
 func NewHandler(options *Options) (_ *Handler, err error) {
-	fetcher, err := NewFetcher(options.BaseURL, options.UserAgent)
+	fetcher, err := NewFetcher(options.BaseURL)
 	if err != nil {
 		return
 	}
+	fetcher.UserAgent = options.UserAgent
+	fetcher.Header = options.RequestHeader
 	h := &Handler{options: options, fetcher: fetcher}
 	h.RefreshSessionID()
 	h.RunRefreshSessionIdJob()

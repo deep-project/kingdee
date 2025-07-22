@@ -14,16 +14,17 @@ type Fetcher struct {
 	BaseURL        string
 	UserAgent      string
 	KDSVCSessionId string
+	Header         map[string]string
 }
 
-func NewFetcher(baseURL, userAgent string) (*Fetcher, error) {
+func NewFetcher(baseURL string) (*Fetcher, error) {
 	if baseURL == "" {
 		return nil, errors.New("BaseURL undefined")
 	}
 	if !strings.HasSuffix(baseURL, "/") {
 		baseURL = baseURL + "/"
 	}
-	return &Fetcher{BaseURL: baseURL, UserAgent: userAgent}, nil
+	return &Fetcher{BaseURL: baseURL}, nil
 }
 
 func (f *Fetcher) SetKDSVCSessionId(kdsvcSessionId string) {
@@ -40,6 +41,7 @@ func (f *Fetcher) RequestHeader(more map[string]string) map[string]string {
 		"User-Agent":          f.UserAgent,
 		"kdservice-sessionid": f.KDSVCSessionId,
 	}
+	maps.Copy(res, f.Header)
 	maps.Copy(res, more)
 	return res
 }
