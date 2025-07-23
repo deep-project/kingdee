@@ -1,6 +1,14 @@
 # kingdee webapi sdk
-金蝶云星空 webapi SDK,在金蝶云星空8.x版本测试通过，其他版本各位自测
+金蝶云星空 webapi SDK,在金蝶云星空8.x版本测试通过
 
+## 项目亮点 / Features
++ 内置30+操作方法
++ 可直接根据服务名请求
++ 支持三种登录方式
++ 支持定时刷新sessionid
++ 支持被动刷新sessionid
++ 可后置登录接口
++ 可使用池并发执行
 
 ## 使用 / Usage
 
@@ -35,7 +43,7 @@ func main() {
 ```
 
 ### 内置方法
-> 基本上内置了所有，如果有缺失，可以报告给我加上
+> 基本上内置了大部分快捷方法，如果有缺失，可以提pull,也可以告诉我加上。也可以看下面的“直接根据服务名称调用”
 ```go
 // 获取账套列表(获取数据中心列表)
 cli.GetDataCenterList() 
@@ -94,6 +102,9 @@ cli.GroupDelete(formid string, data any)
 cli.GetSysReportData(formid string, data any)
 // 发送消息
 cli.SendMsg(data any)
+// 获取即时库存(官方自定义版本)
+cli.GetInventoryData(data any)
+
 ```
 
 #### 直接根据服务名称调用
@@ -167,14 +178,19 @@ type Options struct {
 ```go
 cli, err := kingdee.New(kingdee.NewOptions("http://127.0.0.1:9010/K3Cloud/", nil))
 
+// 先获取账套信息
 AccountInfo,err :=cli.GetDataCenterList()
 
+// 再用完善的信息设置登录接口
 cli.Handler.SetLogin(&adapters.LoginByValidateUser{
   AccountID:  "ACCOUNT_ID",
   Username:   "USER_NAME",
   Password:   "USER_PASSWORD",
   LanguageID: "LANGUAGE_ID",
 })
+
+// 进行其他操作
+cli.View(...)
 ```
 
 ### 使用池并发执行
