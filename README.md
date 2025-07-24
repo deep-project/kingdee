@@ -227,7 +227,7 @@ func main() {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			// 只有存在空间client时，才会被Get到
+			// 只有存在空闲client时，才会被Get到
 			// 否则会停在这里等待
 			client := p.Get()
 			defer p.Put(client)
@@ -254,8 +254,8 @@ import (
 
 func main() {
 
-
 	options := kingdee.NewOptions("http://127.0.0.1:9010/K3Cloud/", &adapters.LoginBySign{....})
+	// 一次性创建5个配置相同的client池
 	var p = pool.NewBySize(5, options)
 	var wg sync.WaitGroup
 
@@ -263,7 +263,7 @@ func main() {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			// 只有存在空间client时，才会被Get到
+			// 只有存在空闲client时，才会被Get到
 			// 否则会停在这里等待
 			client := p.Get()
 			defer p.Put(client)
