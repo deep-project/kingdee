@@ -11,7 +11,9 @@
 + 可使用池并发执行
 
 ## 使用 / Usage
-
+```go
+go get github.com/deep-project/kingdee
+```
 ```go
 
 import (
@@ -195,6 +197,8 @@ cli.View(...)
 
 ### 使用池并发执行
 > 因为金蝶云星空的请求默认是同步模式，也就是说，一个session多次访问时，是同步请求，所以要实现并发执行，就要创建多个client携带不同的sessionid去请求。
+
+##### 创建不同的客户端池
 ```go
 import (
 	"fmt"
@@ -223,6 +227,8 @@ func main() {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
+			// 只有存在空间client时，才会被Get到
+			// 否则会停在这里等待
 			client := p.Get()
 			defer p.Put(client)
 			// 调用金蝶保存接口
@@ -234,6 +240,41 @@ func main() {
 
 ```
 
+##### 通过统一配置创建池
+```go
+import (
+	"fmt"
+	"os"
+	"sync"
+
+	"github.com/deep-project/kingdee"
+	"github.com/deep-project/kingdee/client"
+	"github.com/deep-project/kingdee/pool"
+)
+
+func main() {
+
+
+	options := kingdee.NewOptions("http://127.0.0.1:9010/K3Cloud/", &adapters.LoginBySign{....})
+	var p = pool.NewBySize(5, options)
+	var wg sync.WaitGroup
+
+	for range 100 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			// 只有存在空间client时，才会被Get到
+			// 否则会停在这里等待
+			client := p.Get()
+			defer p.Put(client)
+			// 调用金蝶保存接口
+			client.Save(...)
+		}()
+	}
+	wg.Wait()
+}
+
+```
 
 ## 依赖 / Dependencies
 [tidwall/gjson](https://github.com/tidwall/gjson)

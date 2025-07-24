@@ -21,6 +21,20 @@ func New(clients []*client.Client) *Pool {
 	return pool
 }
 
+// 通过统一配置创建
+func NewBySize(size int, options client.Options) (*Pool, error) {
+	var clients []*client.Client
+	for range size {
+		cli, err := client.NewClient(options)
+		if err != nil {
+			return nil, err
+		}
+		clients = append(clients, cli)
+	}
+	p := New(clients)
+	return p, nil
+}
+
 func (cp *Pool) Get() *client.Client {
 	return <-cp.clients
 }
