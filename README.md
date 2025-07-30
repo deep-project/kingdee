@@ -230,6 +230,7 @@ func main() {
 			// 只有存在空闲client时，才会被Get到
 			// 否则会停在这里等待
 			client := p.Get()
+			// 用完必须归还，否则资源耗尽程序卡死
 			defer p.Put(client)
 			// 调用金蝶保存接口
 			client.Save(...)
@@ -266,6 +267,7 @@ func main() {
 			// 只有存在空闲client时，才会被Get到
 			// 否则会停在这里等待
 			client := p.Get()
+			// 用完必须归还，否则资源耗尽程序卡死
 			defer p.Put(client)
 			// 调用金蝶保存接口
 			client.Save(...)
