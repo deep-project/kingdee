@@ -6,6 +6,7 @@ import (
 
 type Client struct {
 	Handler *Handler
+	Method  *Method
 }
 
 func NewClient(options Options) (cli *Client, err error) {
@@ -14,11 +15,17 @@ func NewClient(options Options) (cli *Client, err error) {
 		return
 	}
 	cli = &Client{Handler: handler}
+	cli.Method = NewMethod(cli, handler)
 	return
 }
 
 // 获取账套列表(获取数据中心列表)
 func (c *Client) GetDataCenterList() (raw []byte, err error) {
+	return c.Handler.Call(consts.GetDataCenterList_API, map[string]any{})
+}
+
+// TODO
+func (c *Client) GetDataCenterListParsed() (raw []byte, err error) {
 	return c.Handler.Call(consts.GetDataCenterList_API, map[string]any{})
 }
 
