@@ -125,8 +125,9 @@ func (c *Client) ExcuteOperation(formid string, operateNumber string, data any) 
 }
 
 // 元数据查询（查询单据信息）
-func (c *Client) QueryBusinessInfo(formid string) (raw []byte, err error) {
-	return c.Handler.Call(consts.QueryBusinessInfo_API, map[string]any{"formId": formid})
+// data示例：map[string]any{"FormId": "PUR_PurchaseOrder"}
+func (c *Client) QueryBusinessInfo(data any) (raw []byte, err error) {
+	return c.Handler.Call(consts.QueryBusinessInfo_API, map[string]any{"data": data})
 }
 
 // 工作流审批

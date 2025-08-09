@@ -79,7 +79,7 @@ cli.BillQuery(data any)
 cli.ExecuteOperation(formid string, operateNumber string, data any)
 cli.ExcuteOperation(formid string, operateNumber string, data any)
 // 元数据查询（查询单据信息）
-cli.QueryBusinessInfo(formid string)
+cli.QueryBusinessInfo(data any)
 // 工作流审批
 cli.WorkflowAudit(data any)
 // 切换组织
