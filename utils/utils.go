@@ -52,3 +52,23 @@ func IsSessionExpired(b []byte) bool {
 	status := GetResultResponseStatus(b)
 	return !status.IsSuccess && status.MsgCode == 1
 }
+
+// 查询迭代器
+// 可以进行翻页查询
+func IterateQuery(limit int, f func(startRow int) ([]map[string]any, error)) ([]map[string]any, error) {
+	var allData = []map[string]any{}
+	var page = 0
+	for {
+		page++
+		startRow := (page - 1) * limit
+		list, err := f(startRow)
+		if err != nil {
+			return allData, err
+		}
+		allData = append(allData, list...)
+		if len(list) < limit {
+			break // 最后一批
+		}
+	}
+	return allData, nil
+}
