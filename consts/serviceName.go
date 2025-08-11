@@ -34,6 +34,7 @@ const (
 	GroupDelete_API         = "Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.GroupDelete.common.kdsvc"                  // 分组删除
 	GetSysReportData_API    = "Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.GetSysReportData.common.kdsvc"             // 查询报表数据
 	SendMsg_API             = "Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.SendMsg.common.kdsvc"                      // 发送消息
+
 )
 
 // 以下是官方人员自定义的API
