@@ -31,7 +31,7 @@ func (m *Methods) IsLogin() (bool, error) {
 
 // 下载附件
 // 不同于client的原始方法
-// 此方法封装了下载逻辑，可以更便捷的下载
+// 此方法封装了轮询的下载逻辑，可以更便捷的下载
 func (m *Methods) AttachmentDownLoad(fileId string) (*models.MethodsFileInfo, error) {
 	var buf bytes.Buffer
 	var StartIndex int64 = 0
