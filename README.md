@@ -44,7 +44,7 @@ func main() {
 }
 ```
 
-### 内置方法
+### 内置基础方法
 > 基本上内置了大部分快捷方法，如果有缺失，可以提pull,也可以告诉我加上。也可以看下面的“直接根据服务名称调用”
 ```go
 // 获取账套列表(获取数据中心列表)
@@ -107,6 +107,12 @@ cli.SendMsg(data any)
 // 获取即时库存(官方自定义版本)
 cli.GetInventoryData(data any)
 
+```
+### 上层封装方法
+```go
+// 根据附件ID下载附件
+// 内部实现了轮询逻辑
+cli.Method.AttachmentDownLoad(fileId string)
 ```
 
 #### 直接根据服务名称调用
