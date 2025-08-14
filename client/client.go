@@ -6,7 +6,7 @@ import (
 
 type Client struct {
 	Handler *Handler
-	Method  *Method
+	Methods *Methods
 }
 
 func NewClient(options Options) (cli *Client, err error) {
@@ -15,7 +15,7 @@ func NewClient(options Options) (cli *Client, err error) {
 		return
 	}
 	cli = &Client{Handler: handler}
-	cli.Method = NewMethod(cli, handler)
+	cli.Methods = NewMethods(cli, handler)
 	return
 }
 

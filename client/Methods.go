@@ -9,20 +9,20 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// TODO 封装的各种上层方法
-type Method struct {
+// 封装的各种上层方法
+type Methods struct {
 	client  *Client
 	handler *Handler
 }
 
-func NewMethod(c *Client, h *Handler) *Method {
-	return &Method{client: c, handler: h}
+func NewMethods(c *Client, h *Handler) *Methods {
+	return &Methods{client: c, handler: h}
 }
 
 // 判断是否已经登录
 // 目前先通过刷新sessionID的方式验证
 // 尚不清楚获取当前用户登录信息的API接口，否则可以替换
-func (m *Method) IsLogin() (bool, error) {
+func (m *Methods) IsLogin() (bool, error) {
 	if err := m.handler.RefreshSessionID(); err != nil {
 		return false, err
 	}
@@ -32,7 +32,7 @@ func (m *Method) IsLogin() (bool, error) {
 // 下载附件
 // 不同于client的原始方法
 // 此方法封装了下载逻辑，可以更便捷的下载
-func (m *Method) AttachmentDownLoad(fileId string) (*models.MethodFileInfo, error) {
+func (m *Methods) AttachmentDownLoad(fileId string) (*models.MethodsFileInfo, error) {
 	var buf bytes.Buffer
 	var StartIndex int64 = 0
 	var FileSize int64 = 0
@@ -64,5 +64,5 @@ func (m *Method) AttachmentDownLoad(fileId string) (*models.MethodFileInfo, erro
 		}
 	}
 
-	return &models.MethodFileInfo{Name: FileName, Size: FileSize, Bytes: buf.Bytes()}, nil
+	return &models.MethodsFileInfo{Name: FileName, Size: FileSize, Bytes: buf.Bytes()}, nil
 }

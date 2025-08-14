@@ -112,7 +112,7 @@ cli.GetInventoryData(data any)
 ```go
 // 根据附件ID下载附件
 // 内部实现了轮询逻辑
-cli.Method.AttachmentDownLoad(fileId string)
+cli.Methods.AttachmentDownLoad(fileId string)
 ```
 
 #### 直接根据服务名称调用
