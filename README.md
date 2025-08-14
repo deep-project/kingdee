@@ -124,8 +124,10 @@ cli.Handler.Call("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.CancelAlloc
 
 ### 支持三种登录方式
 >官方推荐的是sign登录方式，更安全。
+
+#### 1.通过sign登录
 ```go
-// 通过sign登录
+
 &adapters.LoginBySign{
   AccountID:  "ACCOUNT_ID",
   Username:   "USER_NAME",
@@ -133,8 +135,9 @@ cli.Handler.Call("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.CancelAlloc
   AppSecret:  "APP_SECRET",
   LanguageID: "LANGUAGE_ID",
 }
-
-// 通过appSecret登录
+```
+#### 2.通过appSecret登录
+```go
 &adapters.LoginByAppSecret{
   AccountID:  "ACCOUNT_ID",
   Username:   "USER_NAME",
@@ -142,8 +145,9 @@ cli.Handler.Call("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.CancelAlloc
   AppSecret:  "APP_SECRET",
   LanguageID: "LANGUAGE_ID",
 }
-
-// 通过账号密码登录
+```
+#### 3.通过账号密码登录
+```go
 &adapters.LoginByValidateUser{
   AccountID:  "ACCOUNT_ID",
   Username:   "USER_NAME",
