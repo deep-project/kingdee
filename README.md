@@ -1,4 +1,4 @@
-# kingdee Golang SDK
+# Kingdee Golang SDK
 金蝶云星空 Golang SDK,通过webapi实现。在金蝶云星空8.x版本测试通过。
 
 ## 项目亮点 / Features
