@@ -47,13 +47,13 @@ func (h *Handler) GetKDSVCSessionId() string {
 // 刷新sessionid
 func (h *Handler) RefreshSessionID() (err error) {
 	if h.options.Login == nil {
-		return errors.New("Login undefined")
+		return errors.New("login undefined")
 	}
-	sid, err := h.options.Login.KDSVCSessionId(h.fetcher)
+	s, err := h.options.Login.GetSession(h.fetcher)
 	if err != nil {
 		return
 	}
-	h.fetcher.SetKDSVCSessionId(sid)
+	h.fetcher.SetKDSVCSessionId(s.KDSVCSessionId)
 	return
 }
 

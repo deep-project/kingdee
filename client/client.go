@@ -24,7 +24,7 @@ func (c *Client) GetDataCenterList() (raw []byte, err error) {
 	return c.Handler.Call(consts.GetDataCenterList_API, map[string]any{})
 }
 
-// TODO
+// TODO 返回解析好数据的结果
 func (c *Client) GetDataCenterListParsed() (raw []byte, err error) {
 	return c.Handler.Call(consts.GetDataCenterList_API, map[string]any{})
 }

@@ -1,9 +1,13 @@
 package client
 
-import "time"
+import (
+	"time"
+
+	"github.com/deep-project/kingdee/pkg/session"
+)
 
 type LoginInterface interface {
-	KDSVCSessionId(*Fetcher) (string, error)
+	GetSession(*Fetcher) (*session.Session, error)
 }
 
 type Options struct {

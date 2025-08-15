@@ -1,10 +1,12 @@
 package adapters
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/deep-project/kingdee/client"
 	"github.com/deep-project/kingdee/consts"
+	"github.com/deep-project/kingdee/pkg/session"
 	"github.com/tidwall/gjson"
 )
 
@@ -15,7 +17,7 @@ type LoginByValidateUser struct {
 	LanguageID string // 语言ID
 }
 
-func (login *LoginByValidateUser) KDSVCSessionId(f *client.Fetcher) (string, error) {
+func (login *LoginByValidateUser) GetSession(f *client.Fetcher) (*session.Session, error) {
 	params := map[string]any{
 		"parameters": []string{
 			login.AccountID,
@@ -26,19 +28,24 @@ func (login *LoginByValidateUser) KDSVCSessionId(f *client.Fetcher) (string, err
 	}
 	respBody, err := f.Request(consts.LoginByValidateUser_API, params)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	var (
 		respBodyStr     = string(respBody)
 		LoginResultType = gjson.Get(respBodyStr, "LoginResultType").Int()
 		Message         = gjson.Get(respBodyStr, "Message").String()
-		KDSVCSessionId  = gjson.Get(respBodyStr, "KDSVCSessionId").String()
 	)
 	if LoginResultType != 1 {
 		if Message == "" {
-			Message = string(respBody)
+			Message = respBodyStr
 		}
-		return "", fmt.Errorf("Login failed: %s", Message)
+		return nil, fmt.Errorf("login failed 1: %s", Message)
 	}
-	return KDSVCSessionId, nil
+
+	var s session.Session
+	if err := json.Unmarshal(respBody, &s); err != nil {
+		return nil, fmt.Errorf("login failed 2: %s", err.Error())
+	}
+
+	return &s, nil
 }

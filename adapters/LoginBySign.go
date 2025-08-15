@@ -3,6 +3,7 @@ package adapters
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"slices"
 	"strings"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/deep-project/kingdee/client"
 	"github.com/deep-project/kingdee/consts"
+	"github.com/deep-project/kingdee/pkg/session"
 	"github.com/tidwall/gjson"
 )
 
@@ -21,7 +23,7 @@ type LoginBySign struct {
 	LanguageID string // 语言ID
 }
 
-func (login *LoginBySign) KDSVCSessionId(f *client.Fetcher) (string, error) {
+func (login *LoginBySign) GetSession(f *client.Fetcher) (*session.Session, error) {
 	timestamp := fmt.Sprintf("%d", time.Now().Unix())
 	params := map[string]any{
 		"parameters": []string{
@@ -35,21 +37,27 @@ func (login *LoginBySign) KDSVCSessionId(f *client.Fetcher) (string, error) {
 	}
 	respBody, err := f.Request(consts.LoginBySign_API, params)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
+	// TODO 登录接口增加获取当前登录用户信息
+	// 在这里面取数据
+	// fmt.Println(string(respBody))
 	var (
 		respBodyStr     = string(respBody)
 		LoginResultType = gjson.Get(respBodyStr, "LoginResultType").Int()
 		Message         = gjson.Get(respBodyStr, "Message").String()
-		KDSVCSessionId  = gjson.Get(respBodyStr, "KDSVCSessionId").String()
 	)
 	if LoginResultType != 1 {
 		if Message == "" {
-			Message = string(respBody)
+			Message = respBodyStr
 		}
-		return "", fmt.Errorf("Login failed: %s", Message)
+		return nil, fmt.Errorf("login failed 1: %s", Message)
 	}
-	return KDSVCSessionId, nil
+	var s session.Session
+	if err := json.Unmarshal(respBody, &s); err != nil {
+		return nil, fmt.Errorf("login failed 2: %s", err.Error())
+	}
+	return &s, nil
 }
 
 func (login *LoginBySign) getSign(timestamp string) string {
