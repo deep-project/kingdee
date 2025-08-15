@@ -15,32 +15,31 @@
 go get github.com/deep-project/kingdee
 ```
 ```go
+package main
 
 import (
 	"fmt"
 
 	"github.com/deep-project/kingdee"
 	"github.com/deep-project/kingdee/adapters"
-	"github.com/deep-project/kingdee/utils"
 )
 
 func main() {
-
-	cli, err := kingdee.New(kingdee.NewOptions("http://127.0.0.1:9010/K3Cloud/", &adapters.LoginBySign{
+	cli, err := kingdee.New("http://127.0.0.1:9010/K3Cloud/", &adapters.LoginBySign{
 		AccountID:  "ACCOUNT_ID",
 		Username:   "USER_NAME",
 		AppID:      "APP_ID",
 		AppSecret:  "APP_SECRET",
 		LanguageID: "LANGUAGE_ID",
-	}))
-
+	})
+	if err != nil {
+		return
+	}
 	raw, err := cli.View("STK_InStock", map[string]any{"Number": "CGRK00019"})
 	if err != nil {
 		return
 	}
-	status := utils.GetResultResponseStatus(raw)
-	fmt.Println("status", status)
-	fmt.Println("json", string(raw))
+	fmt.Println(string(raw))
 }
 ```
 
@@ -158,44 +157,30 @@ cli.Handler.Call("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.CancelAlloc
 ### 支持定时刷新sessionid
 >可设置每隔多久刷新一次sessionid，防止过期。默认15分钟（因为金蝶服务端默认20分钟过期），可以在配置设置。根据金蝶内部规则，如果20分钟内请求不闲置的话，session是会自动续期的。但以防万一，启用定时刷新更保险一些。
 ```go
-options := kingdee.NewOptions("http://127.0.0.1:9010/K3Cloud/", &adapters.LoginBySign{....})
-options.SetRefreshSessionIdInterval(30 * time.Minute) // 每30分钟刷新一次sessionid
-cli, err := kingdee.New(options)
-
+cli, _ := kingdee.New("http://127.0.0.1:9010/K3Cloud/", &adapters.LoginBySign{})
+// 每30分钟刷新一次session
+cli.Core.SetRefreshSessionInterval(30 * time.Minute)
 ```
 
 
 ### 支持被动刷新sessionid
 >如果访问接口发现已经过期，则刷新sessionid再次请求。默认重试1次，可以在配置设置。
 ```go
-options := kingdee.NewOptions("http://127.0.0.1:9010/K3Cloud/", &adapters.LoginBySign{....})
-options.SessionExpiredRetryCount(3) // 过期时重试3次
-cli, err := kingdee.New(options)
-
-```
-### 全部配置项
-```go
-type Options struct {
-	BaseURL                  string            // api请求基地址
-	UserAgent                string            // api请求的UserAgent
-	APIClientIdentity        string            // 客户端标识(如果系统设置了验证标识，则需要填写)
-	RequestHeader            map[string]string // 额外的api请求头
-	Login                    LoginInterface    // 登录接口
-	RefreshSessionIdInterval time.Duration     // 定时刷新sessionID的时间间隔
-	SessionExpiredRetryCount int               // session过期重试次数
-}
+cli, _ := kingdee.New("http://127.0.0.1:9010/K3Cloud/", &adapters.LoginBySign{})
+// 过期时重试3次
+cli.Core.SetSessionExpiredRetryCount(3)
 ```
 
 ### 可后置登录接口
 >如果初始需要通过免登录的GetDataCenterList()接口获取账套列表，可以先不设置登录接口，拿到账套信息后再设置
 ```go
-cli, err := kingdee.New(kingdee.NewOptions("http://127.0.0.1:9010/K3Cloud/", nil))
+cli, _ := kingdee.New("http://127.0.0.1:9010/K3Cloud/",nil)
 
 // 先获取账套信息
-AccountInfo,err :=cli.GetDataCenterList()
+accountInfoBytes,_ :=cli.GetDataCenterList()
 
 // 再用完善的信息设置登录接口
-cli.Handler.SetLogin(&adapters.LoginByValidateUser{
+cli.Core.SetSession(&adapters.LoginByValidateUser{
   AccountID:  "ACCOUNT_ID",
   Username:   "USER_NAME",
   Password:   "USER_PASSWORD",
@@ -203,7 +188,7 @@ cli.Handler.SetLogin(&adapters.LoginByValidateUser{
 })
 
 // 进行其他操作
-cli.View(...)
+cli.View("STK_InStock", map[string]any{"Number": "CGRK00019"})
 ```
 
 ### 使用池并发执行
@@ -211,25 +196,26 @@ cli.View(...)
 
 ##### 创建不同的客户端池
 ```go
+
 import (
-	"fmt"
-	"os"
 	"sync"
 
 	"github.com/deep-project/kingdee"
-	"github.com/deep-project/kingdee/client"
-	"github.com/deep-project/kingdee/pool"
+	"github.com/deep-project/kingdee/adapters"
+	"github.com/deep-project/kingdee/pkg/client"
+	"github.com/deep-project/kingdee/pkg/pool"
 )
 
 func main() {
 
 	// 创建5个客户端
 	// 金蝶建议的并发是3-5个
-	client_1, _ := kingdee.New(...)
-	client_2, _ := kingdee.New(...)
-	client_3, _ := kingdee.New(...)
-	client_4, _ := kingdee.New(...)
-	client_5, _ := kingdee.New(...)
+	baseURL := "http://127.0.0.1:9010/K3Cloud/"
+	client_1, _ := kingdee.New(baseURL, &adapters.LoginBySign{})
+	client_2, _ := kingdee.New(baseURL, &adapters.LoginBySign{})
+	client_3, _ := kingdee.New(baseURL, &adapters.LoginBySign{})
+	client_4, _ := kingdee.New(baseURL, &adapters.LoginBySign{})
+	client_5, _ := kingdee.New(baseURL, &adapters.LoginBySign{})
 
 	var p = pool.New([]*client.Client{client_1, client_2, client_3, client_4, client_5})
 	var wg sync.WaitGroup
@@ -243,34 +229,35 @@ func main() {
 			client := p.Get()
 			// 用完必须归还，否则资源耗尽程序卡死
 			defer p.Put(client)
-			// 调用金蝶保存接口
-			client.Save(...)
+			// 调用金蝶接口
+			client.View("STK_InStock", map[string]any{"Number": "CGRK00019"})
 		}()
 	}
 	wg.Wait()
+
 }
 
 ```
 
-##### 通过统一配置创建池
+##### 创建N个客户端池
 ```go
+
 import (
-	"fmt"
-	"os"
 	"sync"
 
 	"github.com/deep-project/kingdee"
-	"github.com/deep-project/kingdee/client"
-	"github.com/deep-project/kingdee/pool"
+	"github.com/deep-project/kingdee/adapters"
+	"github.com/deep-project/kingdee/pkg/client"
+	"github.com/deep-project/kingdee/pkg/pool"
 )
 
 func main() {
 
-	options := kingdee.NewOptions("http://127.0.0.1:9010/K3Cloud/", &adapters.LoginBySign{....})
-	// 一次性创建5个配置相同的client池
-	var p = pool.NewBySize(5, options)
+	// 一次性创建5个client池
+	p,_ := pool.NewBySize(5, func(i int) (*client.Client, error) {
+		return kingdee.New("http://127.0.0.1:9010/K3Cloud/", &adapters.LoginBySign{})
+	})
 	var wg sync.WaitGroup
-
 	for range 100 {
 		wg.Add(1)
 		go func() {
@@ -280,11 +267,12 @@ func main() {
 			client := p.Get()
 			// 用完必须归还，否则资源耗尽程序卡死
 			defer p.Put(client)
-			// 调用金蝶保存接口
-			client.Save(...)
+			// 调用金蝶接口
+			client.View("STK_InStock", map[string]any{"Number": "CGRK00019"})
 		}()
 	}
 	wg.Wait()
+
 }
 
 ```
