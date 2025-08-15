@@ -35,6 +35,7 @@ func (c *Core) SetSession(val Session) *Core {
 // 设置刷新session间隔时间
 func (c *Core) SetRefreshSessionInterval(val time.Duration) *Core {
 	c.RefreshSessionInterval = val
+	c.RunRefreshSessionJob()
 	return c
 }
 
@@ -79,11 +80,11 @@ func (c *Core) RefreshSession() (err error) {
 // 如果存在旧的定时器，会先停止旧的定时器并覆盖
 func (c *Core) RunRefreshSessionJob() {
 	go func() {
-		if c.RefreshSessionInterval <= 0 {
-			return
-		}
 		if c.refreshSessionTicker != nil {
 			c.refreshSessionTicker.Stop() // 先停止旧的
+		}
+		if c.RefreshSessionInterval <= 0 {
+			return
 		}
 		c.refreshSessionTicker = time.NewTicker(c.RefreshSessionInterval)
 		defer c.refreshSessionTicker.Stop()
