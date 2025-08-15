@@ -1,6 +1,11 @@
-package session
+package core
 
-type Session struct {
+type Session interface {
+	RefreshSession(*Core) error
+	GetSession() (*SessionData, error)
+}
+
+type SessionData struct {
 	KDSVCSessionId string
 	Context        SessionContext
 }

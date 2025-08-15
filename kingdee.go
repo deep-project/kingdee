@@ -1,11 +1,21 @@
 package kingdee
 
-import "github.com/deep-project/kingdee/client"
+import (
+	"github.com/deep-project/kingdee/adapters"
+	"github.com/deep-project/kingdee/pkg/client"
+	"github.com/deep-project/kingdee/pkg/core"
+)
 
-func New(options client.Options) (*client.Client, error) {
-	return client.NewClient(options)
+func New(baseURL string, s core.Session) (*client.Client, error) {
+	c := core.New(adapters.NewFetcherHTTP(baseURL), s)
+	return client.New(c)
 }
 
-func NewOptions(baseURL string, login client.LoginInterface) client.Options {
-	return client.NewOptions(baseURL, login)
+func NewByFetcher(f core.Fetcher, s core.Session) (*client.Client, error) {
+	c := core.New(f, s)
+	return client.New(c)
+}
+
+func NewByCore(c *core.Core) (*client.Client, error) {
+	return client.New(c)
 }

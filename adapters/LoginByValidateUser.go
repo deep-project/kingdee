@@ -2,11 +2,11 @@ package adapters
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
-	"github.com/deep-project/kingdee/client"
-	"github.com/deep-project/kingdee/consts"
-	"github.com/deep-project/kingdee/pkg/session"
+	"github.com/deep-project/kingdee/pkg/consts"
+	"github.com/deep-project/kingdee/pkg/core"
 	"github.com/tidwall/gjson"
 )
 
@@ -15,9 +15,18 @@ type LoginByValidateUser struct {
 	Username   string // 用户名
 	Password   string // 密码
 	LanguageID string // 语言ID
+
+	sessionData core.SessionData
 }
 
-func (login *LoginByValidateUser) GetSession(f *client.Fetcher) (*session.Session, error) {
+func (login *LoginByValidateUser) GetSession() (*core.SessionData, error) {
+	return &login.sessionData, nil
+}
+
+func (login *LoginByValidateUser) RefreshSession(c *core.Core) error {
+	if c == nil {
+		return errors.New("core undefined")
+	}
 	params := map[string]any{
 		"parameters": []string{
 			login.AccountID,
@@ -26,9 +35,9 @@ func (login *LoginByValidateUser) GetSession(f *client.Fetcher) (*session.Sessio
 			login.LanguageID,
 		},
 	}
-	respBody, err := f.Request(consts.LoginByValidateUser_API, params)
+	respBody, err := c.Request(consts.LoginByValidateUser_API, "", params)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	var (
 		respBodyStr     = string(respBody)
@@ -39,13 +48,11 @@ func (login *LoginByValidateUser) GetSession(f *client.Fetcher) (*session.Sessio
 		if Message == "" {
 			Message = respBodyStr
 		}
-		return nil, fmt.Errorf("login failed 1: %s", Message)
+		return fmt.Errorf("login failed 1: %s", Message)
+	}
+	if err := json.Unmarshal(respBody, &login.sessionData); err != nil {
+		return fmt.Errorf("login failed 2: %s", err.Error())
 	}
 
-	var s session.Session
-	if err := json.Unmarshal(respBody, &s); err != nil {
-		return nil, fmt.Errorf("login failed 2: %s", err.Error())
-	}
-
-	return &s, nil
+	return nil
 }

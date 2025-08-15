@@ -4,14 +4,14 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"slices"
 	"strings"
 	"time"
 
-	"github.com/deep-project/kingdee/client"
-	"github.com/deep-project/kingdee/consts"
-	"github.com/deep-project/kingdee/pkg/session"
+	"github.com/deep-project/kingdee/pkg/consts"
+	"github.com/deep-project/kingdee/pkg/core"
 	"github.com/tidwall/gjson"
 )
 
@@ -21,9 +21,18 @@ type LoginBySign struct {
 	AppID      string // 应用ID
 	AppSecret  string // 应用秘钥
 	LanguageID string // 语言ID
+
+	sessionData core.SessionData
 }
 
-func (login *LoginBySign) GetSession(f *client.Fetcher) (*session.Session, error) {
+func (login *LoginBySign) GetSession() (*core.SessionData, error) {
+	return &login.sessionData, nil
+}
+
+func (login *LoginBySign) RefreshSession(c *core.Core) error {
+	if c == nil {
+		return errors.New("core undefined")
+	}
 	timestamp := fmt.Sprintf("%d", time.Now().Unix())
 	params := map[string]any{
 		"parameters": []string{
@@ -35,13 +44,10 @@ func (login *LoginBySign) GetSession(f *client.Fetcher) (*session.Session, error
 			login.LanguageID,
 		},
 	}
-	respBody, err := f.Request(consts.LoginBySign_API, params)
+	respBody, err := c.Request(consts.LoginBySign_API, "", params)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	// TODO 登录接口增加获取当前登录用户信息
-	// 在这里面取数据
-	// fmt.Println(string(respBody))
 	var (
 		respBodyStr     = string(respBody)
 		LoginResultType = gjson.Get(respBodyStr, "LoginResultType").Int()
@@ -51,13 +57,12 @@ func (login *LoginBySign) GetSession(f *client.Fetcher) (*session.Session, error
 		if Message == "" {
 			Message = respBodyStr
 		}
-		return nil, fmt.Errorf("login failed 1: %s", Message)
+		return fmt.Errorf("login failed 1: %s", Message)
 	}
-	var s session.Session
-	if err := json.Unmarshal(respBody, &s); err != nil {
-		return nil, fmt.Errorf("login failed 2: %s", err.Error())
+	if err := json.Unmarshal(respBody, &login.sessionData); err != nil {
+		return fmt.Errorf("login failed 2: %s", err.Error())
 	}
-	return &s, nil
+	return nil
 }
 
 func (login *LoginBySign) getSign(timestamp string) string {

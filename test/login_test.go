@@ -6,7 +6,7 @@ import (
 
 	"github.com/deep-project/kingdee"
 	"github.com/deep-project/kingdee/adapters"
-	"github.com/deep-project/kingdee/client"
+	"github.com/deep-project/kingdee/pkg/core"
 	"github.com/joho/godotenv"
 )
 
@@ -55,10 +55,10 @@ func getLoginByValidateUserAdapter() *adapters.LoginByValidateUser {
 	}
 }
 
-func logKDSVCSessionId(t *testing.T, login client.LoginInterface) {
-	cli, err := kingdee.New(client.NewOptions(os.Getenv("BASE_URL"), login))
+func logKDSVCSessionId(t *testing.T, s core.Session) {
+	cli, err := kingdee.New(os.Getenv("BASE_URL"), s)
 	if err != nil {
 		t.Error(err)
 	}
-	t.Log(cli.Handler.GetKDSVCSessionId())
+	t.Log(cli.Core.GetKDSVCSessionId())
 }

@@ -1,7 +1,9 @@
 package pool
 
 import (
-	"github.com/deep-project/kingdee/client"
+	"errors"
+
+	"github.com/deep-project/kingdee/pkg/client"
 )
 
 type Pool struct {
@@ -21,11 +23,14 @@ func New(clients []*client.Client) *Pool {
 	return pool
 }
 
-// 通过统一配置创建
-func NewBySize(size int, options client.Options) (*Pool, error) {
+// 通过回调函数批量创建
+func NewBySize(size int, getClient func(i int) (*client.Client, error)) (*Pool, error) {
+	if getClient == nil {
+		return nil, errors.New("getClient function undefined")
+	}
 	var clients []*client.Client
-	for range size {
-		cli, err := client.NewClient(options)
+	for i := range size {
+		cli, err := getClient(i)
 		if err != nil {
 			return nil, err
 		}

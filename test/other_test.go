@@ -6,12 +6,11 @@ import (
 	"testing"
 
 	"github.com/deep-project/kingdee"
-	"github.com/deep-project/kingdee/client"
 )
 
 // 测试获取账套列表
 func TestGetDataCenterList(t *testing.T) {
-	cli, err := kingdee.New(client.NewOptions(os.Getenv("BASE_URL"), nil))
+	cli, err := kingdee.New(os.Getenv("BASE_URL"), nil)
 	if err != nil {
 		t.Error(err)
 		return

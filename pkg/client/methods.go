@@ -5,27 +5,24 @@ import (
 	"encoding/base64"
 	"errors"
 
-	"github.com/deep-project/kingdee/models"
+	"github.com/deep-project/kingdee/pkg/client/models"
+	"github.com/deep-project/kingdee/pkg/core"
 	"github.com/tidwall/gjson"
 )
 
 // 封装的各种上层方法
 type Methods struct {
-	client  *Client
-	handler *Handler
+	client *Client
+	core   *core.Core
 }
 
-func NewMethods(c *Client, h *Handler) *Methods {
-	return &Methods{client: c, handler: h}
+func NewMethods(cli *Client, c *core.Core) *Methods {
+	return &Methods{client: cli, core: c}
 }
 
+// TODO
 // 判断是否已经登录
-// 目前先通过刷新sessionID的方式验证
-// 尚不清楚获取当前用户登录信息的API接口，否则可以替换
 func (m *Methods) IsLogin() (bool, error) {
-	if err := m.handler.RefreshSessionID(); err != nil {
-		return false, err
-	}
 	return true, nil
 }
 
