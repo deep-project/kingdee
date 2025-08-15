@@ -8,10 +8,10 @@ import (
 type Core struct {
 	Fetcher                  Fetcher       // 抓取器
 	Session                  Session       // 会话
-	RefreshSessionInterval   time.Duration // 定时刷新sessionID的时间间隔
+	RefreshSessionInterval   time.Duration // 定时刷新session的时间间隔
 	SessionExpiredRetryCount int           // session过期重试次数
 
-	refreshSessionTicker *time.Ticker // 定时刷新sessionid的定时器
+	refreshSessionTicker *time.Ticker // 定时刷新session的定时器
 }
 
 func New(f Fetcher, s Session) *Core {
@@ -110,7 +110,7 @@ func (c *Core) call(serviceName string, params map[string]any, count int) (res [
 	if err != nil {
 		return
 	}
-	// 如果sessionid过期，则刷新sessionid后再次请求
+	// 如果session过期，则刷新session后再次请求
 	if c.SessionExpiredRetryCount > 0 {
 		if count >= c.SessionExpiredRetryCount {
 			return

@@ -5,8 +5,8 @@
 + 内置30+操作方法
 + 可直接根据服务名请求
 + 支持三种登录方式
-+ 支持定时刷新sessionid
-+ 支持被动刷新sessionid
++ 支持定时刷新session
++ 支持被动刷新session
 + 可后置登录接口
 + 可使用池并发执行
 
@@ -118,7 +118,7 @@ cli.Methods.AttachmentDownLoad(fileId string)
 #### 直接根据服务名称调用
 >如果内置方法无法满足需求，亦可以直接通过服务名请求结果。
 ```go
-cli.Handler.Call("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.CancelAllocate.common.kdsvc" , map[string]any{"data": data})
+cli.Core.Call("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.CancelAllocate.common.kdsvc" , map[string]any{"data": data})
 ```
 
 ### 支持三种登录方式
@@ -154,8 +154,8 @@ cli.Handler.Call("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.CancelAlloc
   LanguageID: "LANGUAGE_ID",
 }
 ```
-### 支持定时刷新sessionid
->可设置每隔多久刷新一次sessionid，防止过期。默认15分钟（因为金蝶服务端默认20分钟过期），可以在配置设置。根据金蝶内部规则，如果20分钟内请求不闲置的话，session是会自动续期的。但以防万一，启用定时刷新更保险一些。
+### 支持定时刷新session
+>可设置每隔多久刷新一次session，防止过期。默认15分钟（因为金蝶服务端默认20分钟过期），可以在配置设置。根据金蝶内部规则，如果20分钟内请求不闲置的话，session是会自动续期的。但以防万一，启用定时刷新更保险一些。
 ```go
 cli, _ := kingdee.New("http://127.0.0.1:9010/K3Cloud/", &adapters.LoginBySign{})
 // 每30分钟刷新一次session
@@ -163,8 +163,8 @@ cli.Core.SetRefreshSessionInterval(30 * time.Minute)
 ```
 
 
-### 支持被动刷新sessionid
->如果访问接口发现已经过期，则刷新sessionid再次请求。默认重试1次，可以在配置设置。
+### 支持被动刷新session
+>如果访问接口发现已经过期，则刷新session再次请求。默认重试1次，可以在配置设置。
 ```go
 cli, _ := kingdee.New("http://127.0.0.1:9010/K3Cloud/", &adapters.LoginBySign{})
 // 过期时重试3次
@@ -192,7 +192,7 @@ cli.View("STK_InStock", map[string]any{"Number": "CGRK00019"})
 ```
 
 ### 使用池并发执行
-> 因为金蝶云星空的请求默认是同步模式，也就是说，一个session多次访问时，是同步请求，所以要实现并发执行，就要创建多个client携带不同的sessionid去请求。
+> 因为金蝶云星空的请求默认是同步模式，也就是说，一个session多次访问时，是同步请求，所以要实现并发执行，就要创建多个client携带不同的session去请求。
 
 ##### 创建不同的客户端池
 ```go
