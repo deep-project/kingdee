@@ -218,6 +218,7 @@ func main() {
 	client_5, _ := kingdee.New(baseURL, &adapters.LoginBySign{})
 
 	var p = pool.New([]*client.Client{client_1, client_2, client_3, client_4, client_5})
+	defer p.Close()
 	var wg sync.WaitGroup
 
 	for range 100 {
@@ -257,6 +258,7 @@ func main() {
 	p,_ := pool.NewBySize(5, func(i int) (*client.Client, error) {
 		return kingdee.New("http://127.0.0.1:9010/K3Cloud/", &adapters.LoginBySign{})
 	})
+	defer p.Close()
 	var wg sync.WaitGroup
 	for range 100 {
 		wg.Add(1)

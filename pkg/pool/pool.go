@@ -40,6 +40,13 @@ func NewBySize(size int, getClient func(i int) (*client.Client, error)) (*Pool, 
 	return p, nil
 }
 
+func (cp *Pool) Close() {
+	close(cp.clients)
+	for c := range cp.clients {
+		c.Close()
+	}
+}
+
 func (cp *Pool) Get() *client.Client {
 	return <-cp.clients
 }
