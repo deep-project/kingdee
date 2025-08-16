@@ -21,6 +21,10 @@ func New(c *core.Core) (cli *Client, err error) {
 	return
 }
 
+func (c *Client) Close() {
+	c.Core.Close()
+}
+
 // 获取账套列表(获取数据中心列表)
 func (c *Client) GetDataCenterList() (raw []byte, err error) {
 	return c.Core.Call(consts.GetDataCenterList_API, map[string]any{})

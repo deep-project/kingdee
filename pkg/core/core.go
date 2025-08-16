@@ -26,6 +26,13 @@ func New(f Fetcher, s Session) *Core {
 	return c
 }
 
+// 关闭
+func (c *Core) Close() {
+	if c.refreshSessionTicker != nil {
+		c.refreshSessionTicker.Stop() // 停止定时器
+	}
+}
+
 // 设置session接口
 func (c *Core) SetSession(val Session) *Core {
 	c.Session = val
