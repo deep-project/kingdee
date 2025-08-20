@@ -38,13 +38,13 @@ func StructWithExtraParamsToMap(input any) (map[string]any, error) {
 
 // 查询迭代器
 // 可以进行翻页查询
-func IterateQuery(limit int, f func(startRow int) ([]map[string]any, error)) ([]map[string]any, error) {
+func IterateQuery(limit int, f func(startRow, page int) ([]map[string]any, error)) ([]map[string]any, error) {
 	var allData = []map[string]any{}
 	var page = 0
 	for {
 		page++
 		startRow := (page - 1) * limit
-		list, err := f(startRow)
+		list, err := f(startRow, page)
 		if err != nil {
 			return allData, err
 		}
