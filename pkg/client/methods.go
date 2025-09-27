@@ -68,7 +68,7 @@ func (m *Methods) AttachmentDownLoad(fileId string) (*models.MethodsFileInfo, er
 // 通用单据查询
 // 封装了翻页逻辑
 func (m *Methods) BillQuery(opt models.BillQueryOption) (_ []byte, err error) {
-	list, err := utils.IterateQuery(opt.Limit, func(startRow, page int) (current []string, _err error) {
+	list, err := utils.IterateQuery(opt.Limit, func(startRow, page int) (current []map[string]any, _err error) {
 		if opt.QueryBeforeHook != nil {
 			opt.QueryBeforeHook(opt, startRow, page, current)
 		}

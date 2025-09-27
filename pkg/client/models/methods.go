@@ -17,4 +17,4 @@ type BillQueryOption struct {
 	QueryAfterHook  BillQueryHook // 查询后置钩子
 }
 
-type BillQueryHook func(opt BillQueryOption, startRow, page int, current []string)
+type BillQueryHook func(opt BillQueryOption, startRow, page int, current []map[string]any)
