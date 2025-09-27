@@ -8,8 +8,7 @@ import (
 )
 
 type Client struct {
-	Core    *core.Core
-	Methods *Methods
+	Core *core.Core
 }
 
 func New(c *core.Core) (cli *Client, err error) {
@@ -17,7 +16,6 @@ func New(c *core.Core) (cli *Client, err error) {
 		return nil, errors.New("core undefined")
 	}
 	cli = &Client{Core: c}
-	cli.Methods = NewMethods(cli, c)
 	return
 }
 

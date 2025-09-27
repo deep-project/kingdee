@@ -110,9 +110,20 @@ cli.GetInventoryData(data any)
 ```
 #### 上层封装方法
 ```go
-// 根据附件ID下载附件
-// 内部实现了轮询逻辑
-cli.Methods.AttachmentDownLoad(fileId string)
+
+import (
+	"github.com/deep-project/kingdee/pkg/methods"
+)
+
+m := methods.New(client)
+
+// 根据附件ID下载附件 (内部实现了轮询逻辑)
+m.AttachmentDownLoad(fileId string)
+
+// 通用单据列表查询 (内部实现了翻页逻辑)
+m.BillQuery(opt methods.BillQueryOptions)
+methods.BillQuery[T](m, opt) // 可以自定义返回列表的类型
+
 ```
 
 #### 直接根据服务名称调用
