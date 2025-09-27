@@ -3,10 +3,13 @@ package client
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
+	"strings"
 
 	"github.com/deep-project/kingdee/pkg/client/models"
 	"github.com/deep-project/kingdee/pkg/core"
+	"github.com/deep-project/kingdee/pkg/utils"
 	"github.com/tidwall/gjson"
 )
 
@@ -47,7 +50,6 @@ func (m *Methods) AttachmentDownLoad(fileId string) (*models.MethodsFileInfo, er
 		StartIndex = gjson.Get(str, "Result.StartIndex").Int()
 		FileSize = gjson.Get(str, "Result.FileSize").Int()
 		FileName = gjson.Get(str, "Result.FileName").String()
-
 		if !IsSuccess {
 			return nil, errors.New(Errors)
 		}
@@ -60,6 +62,36 @@ func (m *Methods) AttachmentDownLoad(fileId string) (*models.MethodsFileInfo, er
 			break
 		}
 	}
-
 	return &models.MethodsFileInfo{Name: FileName, Size: FileSize, Bytes: buf.Bytes()}, nil
+}
+
+// 通用单据查询
+// 封装了翻页逻辑
+func (m *Methods) BillQuery(opt models.BillQueryOption) (_ []byte, err error) {
+	list, err := utils.IterateQuery(opt.Limit, func(startRow, page int) (current []string, _err error) {
+		if opt.QueryBeforeHook != nil {
+			opt.QueryBeforeHook(opt, startRow, page, current)
+		}
+		b, _err := m.client.BillQuery(map[string]any{
+			"FormId":       opt.FormId,
+			"FieldKeys":    strings.Join(opt.FieldKeys, ","),
+			"FilterString": opt.FilterString,
+			"Limit":        opt.Limit,
+			"StartRow":     startRow,
+		})
+		if _err != nil {
+			return
+		}
+		if _err = json.Unmarshal(b, &current); err != nil { // 响应内容转成数组
+			return
+		}
+		if opt.QueryAfterHook != nil {
+			opt.QueryAfterHook(opt, startRow, page, current)
+		}
+		return
+	})
+	if err != nil {
+		return
+	}
+	return json.Marshal(list)
 }
