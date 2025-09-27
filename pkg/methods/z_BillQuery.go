@@ -2,6 +2,7 @@ package methods
 
 import (
 	"encoding/json"
+	"errors"
 	"strings"
 
 	"github.com/deep-project/kingdee/pkg/utils"
@@ -9,7 +10,6 @@ import (
 
 // 单据查询配置
 type BillQueryOptions struct {
-	FormId          string        `json:"formId"`       // 业务对象表单Id（必录）
 	FieldKeys       []string      `json:"fieldKeys"`    // 需查询的字段key集合
 	FilterString    any           `json:"filterString"` // 过滤条件,数组或字符串格式
 	Limit           int           `json:"limit"`        // 每轮查询的最大行数，最大10000
@@ -21,7 +21,10 @@ type BillQueryHook func(opt BillQueryOptions, startRow, page int, current []map[
 
 // 通用单据列表查询
 // 内部封装了翻页逻辑
-func (m *Methods) BillQuery(opt BillQueryOptions) (_ []byte, err error) {
+func (m *Methods) BillQuery(formId string, opt BillQueryOptions) (_ []byte, err error) {
+	if formId == "" {
+		return nil, errors.New("formId 未定义")
+	}
 	if opt.Limit == 0 {
 		opt.Limit = 10000
 	}
@@ -30,7 +33,7 @@ func (m *Methods) BillQuery(opt BillQueryOptions) (_ []byte, err error) {
 			opt.QueryBeforeHook(opt, startRow, page, current)
 		}
 		b, _err := m.client.BillQuery(map[string]any{
-			"FormId":       opt.FormId,
+			"FormId":       formId,
 			"FieldKeys":    strings.Join(opt.FieldKeys, ","),
 			"FilterString": opt.FilterString,
 			"Limit":        opt.Limit,
@@ -53,8 +56,8 @@ func (m *Methods) BillQuery(opt BillQueryOptions) (_ []byte, err error) {
 	return json.Marshal(list)
 }
 
-func BillQuery[T any](m *Methods, opt BillQueryOptions) (res []T, err error) {
-	b, err := m.BillQuery(opt)
+func BillQuery[T any](m *Methods, formId string, opt BillQueryOptions) (res []T, err error) {
+	b, err := m.BillQuery(formId, opt)
 	if err != nil {
 		return
 	}
