@@ -22,6 +22,9 @@ type BillQueryHook func(opt BillQueryOptions, startRow, page int, current []map[
 // 通用单据列表查询
 // 内部封装了翻页逻辑
 func (m *Methods) BillQuery(opt BillQueryOptions) (_ []byte, err error) {
+	if opt.Limit == 0 {
+		opt.Limit = 10000
+	}
 	list, err := utils.IterateQuery(opt.Limit, func(startRow, page int) (current []map[string]any, _err error) {
 		if opt.QueryBeforeHook != nil {
 			opt.QueryBeforeHook(opt, startRow, page, current)
